@@ -7,6 +7,7 @@ import mlflow.models
 import pandas as pd
 import pickle as pkl
 import matplotlib.pyplot as plt
+import sklearn
 from sklearn.utils import resample
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -115,31 +116,38 @@ def preprocess(df):
 
 def train(X_train, y_train):
     """
-    Train a logistic regression model.
+    Train a random forest regression model.
 
     Args:
         X_train (pd.DataFrame): DataFrame with features
         y_train (pd.Series): Series with target
 
     Returns:
-        LogisticRegression: trained logistic regression model
+        RandomForestRegressor: trained random forest regression model
     """
-    log_reg = LogisticRegression(max_iter=1000)
-    log_reg.fit(X_train, y_train)
+    n_estimators = 100
+    criterion = "gini"
+    max_depth = None
+    RF = sklearn.ensemble.RandomForestClassifier(
+        n_estimators=n_estimators,
+        criterion=criterion,
+        max_depth=max_depth,
+    )
+    RF.fit(X_train, y_train)
 
     ### Log the model with the input and output schema
     # Infer signature (input and output schema)
-    sign = mlflow.models.infer_signature(X_train, log_reg.predict(X_train))
+    sign = mlflow.models.infer_signature(X_train, RF.predict(X_train))
     
     # Log model
     mlflow.sklearn.log_model(
-        sk_model=log_reg, 
+        sk_model=RF,
         artifact_path="model", 
         signature=sign
     )
     ### Log the data
     mlflow.log_artifact("dataset/Churn_Modelling.csv", artifact_path="data")
-    return log_reg
+    return RF
 
 
 def main():
@@ -149,12 +157,16 @@ def main():
     mlflow.set_experiment("Bank Customer Churn Prediction")
 
     ### Start a new run and leave all the main function code as part of the experiment
-    mlflow.start_run(run_name="Logistic Regression")
+    mlflow.start_run(run_name="Random Forest")
     df = pd.read_csv("dataset/Churn_Modelling.csv")
     col_transf, X_train, X_test, y_train, y_test = preprocess(df)
 
     ### Log the max_iter parameter
-    mlflow.log_param("max_iter", 1000)
+    mlflow.log_params({
+        "n_estimators": 100,
+        "criterion": "gini",
+        "max_depth": None,
+    })
     model = train(X_train, y_train)
 
     
@@ -167,7 +179,7 @@ def main():
     mlflow.log_metric("f1", f1_score(y_test, y_pred))
 
     ### Log tag
-    mlflow.set_tag("model", "Logistic Regression")
+    mlflow.set_tag("model", "Random Forest")
 
     
     conf_mat = confusion_matrix(y_test, y_pred, labels=model.classes_)
