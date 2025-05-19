@@ -2,26 +2,16 @@
 This module contains functions to preprocess and train the model
 for bank consumer churn prediction.
 """
-
 import mlflow.models
+import mlflow.models
+import models
+import log_model
 import pandas as pd
 import pickle as pkl
-import matplotlib.pyplot as plt
-import sklearn
 from sklearn.utils import resample
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
 from sklearn.compose import make_column_transformer
 from sklearn.preprocessing import OneHotEncoder,  StandardScaler
-from sklearn.metrics import (
-    accuracy_score,
-    precision_score,
-    recall_score,
-    f1_score,
-    confusion_matrix,
-    ConfusionMatrixDisplay,
-)
-
 ### Import MLflow
 import mlflow
 def rebalance(data):
@@ -109,90 +99,26 @@ def preprocess(df):
     X_test = col_transf.transform(X_test)
     X_test = pd.DataFrame(X_test, columns=col_transf.get_feature_names_out())
     # Log the transformer as an artifact
-    pkl.dump(col_transf, open("transformer.pkl", "wb"))
-    mlflow.log_artifact("transformer.pkl")
     return col_transf, X_train, X_test, y_train, y_test
 
-
-def train(X_train, y_train):
-    """
-    Train a random forest regression model.
-
-    Args:
-        X_train (pd.DataFrame): DataFrame with features
-        y_train (pd.Series): Series with target
-
-    Returns:
-        RandomForestRegressor: trained random forest regression model
-    """
-    n_estimators = 100
-    criterion = "gini"
-    max_depth = None
-    RF = sklearn.ensemble.RandomForestClassifier(
-        n_estimators=n_estimators,
-        criterion=criterion,
-        max_depth=max_depth,
-    )
-    RF.fit(X_train, y_train)
-
-    ### Log the model with the input and output schema
-    # Infer signature (input and output schema)
-    sign = mlflow.models.infer_signature(X_train, RF.predict(X_train))
-    
-    # Log model
-    mlflow.sklearn.log_model(
-        sk_model=RF,
-        artifact_path="model", 
-        signature=sign
-    )
-    ### Log the data
-    mlflow.log_artifact("dataset/Churn_Modelling.csv", artifact_path="data")
-    return RF
-
-
 def main():
-    ### Set the tracking URI for MLflow
-    mlflow.set_tracking_uri("http://127.0.0.1:5000")
-    ### Set the experiment name
-    mlflow.set_experiment("Bank Customer Churn Prediction")
 
-    ### Start a new run and leave all the main function code as part of the experiment
-    mlflow.start_run(run_name="Random Forest")
+    uri = "http://127.0.0.1:5000"
+    expermint = "Bank Customer Churn Prediction"
     df = pd.read_csv("dataset/Churn_Modelling.csv")
-    col_transf, X_train, X_test, y_train, y_test = preprocess(df)
-
-    ### Log the max_iter parameter
-    mlflow.log_params({
-        "n_estimators": 100,
-        "criterion": "gini",
-        "max_depth": None,
-    })
-    model = train(X_train, y_train)
-
-    
+    col_transf,X_train, X_test, y_train, y_test = preprocess(df)
+    sign = mlflow.models.infer_signature(X_train, y_train)
+    ###  Run 1 ### 
+    model,prams = models.train_RF(X_train, y_train)
     y_pred = model.predict(X_test)
-
-    ### Log metrics after calculating them
-    mlflow.log_metric("accuracy", accuracy_score(y_test, y_pred))
-    mlflow.log_metric("precision", precision_score(y_test, y_pred))
-    mlflow.log_metric("recall", recall_score(y_test, y_pred))
-    mlflow.log_metric("f1", f1_score(y_test, y_pred))
-
-    ### Log tag
-    mlflow.set_tag("model", "Random Forest")
-
-    
-    conf_mat = confusion_matrix(y_test, y_pred, labels=model.classes_)
-    conf_mat_disp = ConfusionMatrixDisplay(
-        confusion_matrix=conf_mat, display_labels=model.classes_
-    )
-    conf_mat_disp.plot()
-    conf_mat_disp.figure_
-    plt.savefig("confusion_matrix.png")
-    # Log the image as an artifact in MLflow
-    mlflow.log_artifact("confusion_matrix.png")
-    plt.show()
-    mlflow.end_run()
-
+    log_model.log(uri,expermint,col_transf,y_pred,y_test,"Random Forest",model,prams,sign)
+    ### Run 2 ###
+    model,prams = models.train_SVM(X_train,y_train)
+    y_pred = model.predict(X_test)
+    log_model.log(uri,expermint,col_transf,y_pred,y_test,"Support Vector Machine",model,prams,sign)
+    ### Run 3 ###
+    model,prams = models.train_GradientBoosting(X_train,y_train)
+    y_pred = model.predict(X_test)
+    log_model.log(uri,expermint,col_transf,y_pred,y_test,"Gradient Boosting",model,prams,sign)
 if __name__ == "__main__":
     main()

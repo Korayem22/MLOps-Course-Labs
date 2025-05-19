@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/0/cd009e0d0e3545da804735fd4ed4b32b/artifacts
+end_time: 1747646612817
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: cd009e0d0e3545da804735fd4ed4b32b
+run_name: carefree-perch-514
+run_uuid: cd009e0d0e3545da804735fd4ed4b32b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747646612809
+status: 3
+tags: []
+user_id: mohamedkorayem
