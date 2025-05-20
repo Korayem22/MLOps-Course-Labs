@@ -4,6 +4,8 @@ import joblib
 import logging
 import uvicorn
 import numpy as np
+import pandas as pd
+
 
 # Logging setup
 logging.basicConfig(filename="logs/app.log", level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -39,7 +41,6 @@ def health():
     logging.info("Health check endpoint hit")
     return {"status": "OK"}
 
-import pandas as pd
 
 @app.post("/predict")
 def predict(data: ModelInput):
