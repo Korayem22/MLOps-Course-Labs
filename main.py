@@ -5,6 +5,7 @@ import logging
 import uvicorn
 import numpy as np
 import pandas as pd
+from prometheus_fastapi_instrumentator import Instrumentator
 
 
 # Logging setup
@@ -16,6 +17,8 @@ transformer = joblib.load("model/transformer.pkl")
 
 # App init
 app = FastAPI()
+
+instrumentator = Instrumentator().instrument(app).expose(app)
 
 # Define input schema
 class ModelInput(BaseModel):
