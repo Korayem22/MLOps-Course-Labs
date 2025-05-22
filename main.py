@@ -10,8 +10,8 @@ import os
 
 
 # Logging setup
-os.makedirs("logs", exist_ok=True)
-logging.basicConfig(filename="logs/app.log", level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+#os.makedirs("logs", exist_ok=True)
+#logging.basicConfig(filename="logs/app.log", level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 # Load model and transformer
 model = joblib.load("model/model.pkl")
@@ -38,12 +38,12 @@ class ModelInput(BaseModel):
 
 @app.get("/")
 def home():
-    logging.info("Home endpoint hit")
+    #logging.info("Home endpoint hit")
     return {"message": "Welcome to the GradBoost model API"}
 
 @app.get("/health")
 def health():
-    logging.info("Health check endpoint hit")
+    #logging.info("Health check endpoint hit")
     return {"status": "OK"}
 
 
@@ -66,7 +66,7 @@ def predict(data: ModelInput):
         prediction = model.predict(transformed)[0]
         return {"prediction": int(prediction)}
     except Exception as e:
-        logging.error(f"Prediction failed: {str(e)}")
+        #logging.error(f"Prediction failed: {str(e)}")
         raise HTTPException(status_code=500, detail="Prediction failed")
 
 if __name__ == "__main__":
