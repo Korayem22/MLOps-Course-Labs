@@ -5,7 +5,7 @@ services:
     image: 060795916912.dkr.ecr.us-east-1.amazonaws.com/churn-prediction:Korayem512 
     container_name: fastapi_app
     ports:
-      - "443:8000"
+      - "80:8000"
     networks:
       - monitor_net
 
@@ -19,7 +19,7 @@ services:
     networks:
       - monitor_net
 
-      
+
   grafana:
     image: grafana/grafana
     container_name: grafana
