@@ -2,10 +2,10 @@ version: "3.8"
 
 services:
   fastapi:
-    image: 060795916912.dkr.ecr.us-east-1.amazonaws.com/churn-prediction:Korayem512  
+    image: 060795916912.dkr.ecr.us-east-1.amazonaws.com/churn-prediction:Korayem512 
     container_name: fastapi_app
     ports:
-      - "443:443"
+      - "443:8000"
     networks:
       - monitor_net
 
