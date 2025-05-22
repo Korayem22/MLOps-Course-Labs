@@ -1,13 +1,15 @@
-name: Test FastAPI Project
+name: CI - Test & AWS Setup
 
 on:
   push:
     branches:
-      - main 
-
+      - main #
 jobs:
-  test:
+  test-and-auth:
     runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: us-east-1
 
     steps:
       - name: Checkout code
@@ -26,3 +28,14 @@ jobs:
       - name: Run unit tests
         run: |
           pytest tests
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Output test AWS CLI identity 
+        run: |
+          aws sts get-caller-identity
