@@ -51,3 +51,16 @@ jobs:
         run: |
           IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}
           docker push $IMAGE_URI:${{ env.IMAGE_TAG }}
+      - name: SSH & Deploy on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          script: |
+            rm -rf korayem
+            mkdir korayem
+            cd korayem
+            git clone https://github.com/${{ github.repository }}.git
+            cd MLOps-Course-Labs
+
