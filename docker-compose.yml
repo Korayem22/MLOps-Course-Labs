@@ -19,6 +19,7 @@ services:
     networks:
       - monitor_net
 
+      
   grafana:
     image: grafana/grafana
     container_name: grafana
