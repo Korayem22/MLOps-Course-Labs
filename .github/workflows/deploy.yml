@@ -1,4 +1,4 @@
-name: CI - Test & Build Docker Image
+name: CI - Test, Build, Push to ECR
 
 on:
   push:
@@ -6,13 +6,13 @@ on:
       - main
 
 jobs:
-  test-build:
+  test-build-push:
     runs-on: ubuntu-latest
 
     env:
-      AWS_REGION: us-east-1 
       ECR_REPO: churn-prediction
-      TAG_SUFFIX: Korayem512
+      IMAGE_TAG: Korayem512  # your name + last 3 digits of your phone number
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,8 +36,18 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Build Docker image locally
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
         run: |
-          docker build -t churn-prediction:test-build .
+          IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}
+          docker build -t $IMAGE_URI:${{ env.IMAGE_TAG }} .
+
+      - name: Push Docker image to ECR
+        run: |
+          IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}
+          docker push $IMAGE_URI:${{ env.IMAGE_TAG }}
