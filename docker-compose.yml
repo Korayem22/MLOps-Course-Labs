@@ -1,9 +1,11 @@
+version: "3.8"
+
 services:
   fastapi:
-    build: .
+    image: 060795916912.dkr.ecr.us-east-1.amazonaws.com/churn-prediction:Korayem512  
     container_name: fastapi_app
     ports:
-      - "8000:8000"
+      - "443:443"
     networks:
       - monitor_net
 
@@ -13,7 +15,7 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - "9090:9090"
+      - "9091:9091"
     networks:
       - monitor_net
 
@@ -21,7 +23,7 @@ services:
     image: grafana/grafana
     container_name: grafana
     ports:
-      - "3000:3000"
+      - "3001:3001"
     networks:
       - monitor_net
 

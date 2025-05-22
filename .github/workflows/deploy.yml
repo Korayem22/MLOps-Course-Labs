@@ -63,4 +63,5 @@ jobs:
             cd korayem
             git clone https://github.com/${{ github.repository }}.git
             cd MLOps-Course-Labs
-
+            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/churn-prediction:Korayem512
+            docker compose up -d
