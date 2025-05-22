@@ -1,16 +1,18 @@
-name: CI - Test & AWS Setup
+name: CI - Test & Build Docker Image
 
 on:
   push:
     branches:
-      - main #
+      - main
+
 jobs:
-  test-and-auth:
+  test-build:
     runs-on: ubuntu-latest
 
     env:
-      AWS_REGION: us-east-1
-
+      AWS_REGION: us-east-1 
+      ECR_REPO: churn-prediction
+      TAG_SUFFIX: Korayem512
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,6 +38,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Output test AWS CLI identity 
+      - name: Build Docker image locally
         run: |
-          aws sts get-caller-identity
+          docker build -t churn-prediction:test-build .
