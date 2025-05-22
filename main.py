@@ -6,9 +6,11 @@ import uvicorn
 import numpy as np
 import pandas as pd
 from prometheus_fastapi_instrumentator import Instrumentator
+import os
 
 
 # Logging setup
+os.makedirs("logs", exist_ok=True)
 logging.basicConfig(filename="logs/app.log", level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 # Load model and transformer
